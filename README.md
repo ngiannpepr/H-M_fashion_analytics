@@ -35,9 +35,13 @@ hm-fashion-analytics/
 ├── data/               # Dữ liệu thô, dữ liệu trung gian và dữ liệu đã xử lý (Parquet/CSV)
 ├── docs/               # Tài liệu Markdown, từ điển dữ liệu và Báo cáo Kinh doanh cuối cùng
 ├── models/             # Các mô hình ML và Scaler đã lưu (pkl)
-├── notebooks/          # Jupyter Notebooks cho EDA và các luồng ML (01 đến 04)
+├── notebooks/          # Jupyter Notebooks phân tích (01_data_understanding & 03_ml_2_recommendation)
 ├── reports/            # Hình ảnh, biểu đồ và báo cáo tóm tắt
-├── src/                # Mã nguồn Python (làm sạch dữ liệu, truy vấn SQL, vẽ biểu đồ)
+├── src/                # Mã nguồn Python xử lý toàn bộ Data Pipeline & Mô hình phân tích:
+│   ├── data/           # Module làm sạch và chuẩn hóa dữ liệu thô
+│   ├── features/       # Module kỹ thuật trích xuất đặc trưng Khách hàng & Sản phẩm
+│   ├── sql/            # Module truy vấn & phân tích SQL DuckDB (RFM, Cá nhân hóa, Dự báo tồn kho)
+│   └── visualization/  # Module trực quan hóa dữ liệu EDA
 ├── tests/              # Unit test để kiểm tra tính toàn vẹn của dữ liệu
 ├── venv/               # Môi trường ảo Python (Virtual Environment)
 ├── PROJECT_CONTEXT.md  # Yêu cầu dự án chi tiết ban đầu
@@ -120,12 +124,45 @@ source venv/bin/activate
 pip install pandas numpy scikit-learn statsmodels matplotlib seaborn duckdb pyarrow jupyter
 ```
 
-**4. Khởi chạy Jupyter Notebooks**
-Điều hướng tới thư mục `notebooks/` để khám phá quy trình phân tích theo từng bước:
+**4. Thực thi Dự án (Execution)**
+
+Bạn có thể lựa chọn 1 trong 2 cách sau để chạy dự án tùy theo nhu cầu:
+
+#### 🔹 Cách 1: Chạy tự động toàn bộ Data Pipeline qua các script trong `src/` (Khuyến nghị)
+Toàn bộ luồng xử lý dữ liệu từ làm sạch, trích xuất đặc trưng đến các mô hình phân tích SQL đã được mô-đun hóa trong thư mục `src/`. Bạn chỉ cần thực thi tuần tự các lệnh sau:
+
+```bash
+# Bước 4.1: Làm sạch và chuẩn hóa dữ liệu thô (Data Cleaning)
+python src/data/clean_customers.py
+python src/data/clean_articles.py
+python src/data/clean_transactions.py
+
+# Bước 4.2: Xây dựng bảng đặc trưng Khách hàng & Sản phẩm (Feature Engineering)
+python src/features/build_customer_features.py
+python src/features/build_product_features.py
+
+# Bước 4.3: Thực thi các mô hình phân tích SQL chuyên sâu theo 3 trụ cột kinh doanh
+python src/sql/analyze_retention_rfm.py                # Trụ cột 1: Phân khúc RFM & Rủi ro Churn
+python src/sql/analyze_personalization_preferences.py   # Trụ cột 2: Cá nhân hóa & Sở thích danh mục
+python src/sql/analyze_inventory_demand.py             # Trụ cột 3: Dự báo & Quản trị tồn kho
+
+# Bước 4.4: Tạo trực quan hóa dữ liệu EDA & Xuất biểu đồ báo cáo
+python src/visualization/run_eda.py
+python src/visualization/run_advanced_eda.py
+```
+
+#### 🔹 Cách 2: Khám phá trực quan qua các Jupyter Notebook hiện có
+Nếu bạn muốn theo dõi trực quan từng bước phân tích khám phá hoặc huấn luyện mô hình gợi ý, hãy khởi chạy Jupyter:
+
 ```bash
 jupyter notebook
 ```
-* **Lưu ý:** Vui lòng chạy các Notebook theo thứ tự tuần tự (01 -> 02 -> 03 -> 04) để đảm bảo luồng dữ liệu chính xác.
+
+Khám phá 2 notebook phân tích chính trong thư mục `notebooks/`:
+* `notebooks/01_data_understanding.ipynb`: Khám phá dữ liệu ban đầu, cấu trúc schema, kiểm tra tính toàn vẹn và tỷ lệ khuyết thiếu (Data Profiling & EDA).
+* `notebooks/03_ml_2_recommendation.ipynb`: Nghiên cứu, huấn luyện và đánh giá hệ thống gợi ý sản phẩm 2 giai đoạn (Popularity Baseline kết hợp TruncatedSVD Collaborative Filtering).
+
+> 💡 **Lưu ý:** Phần lớn code tiền xử lý dữ liệu, tính toán đặc trưng và phân tích thống kê SQL đã được chuyển đổi thành các module hoàn chỉnh trong thư mục `src/data/`, `src/features/` và `src/sql/`. Do đó, người dùng không cần chạy tuần tự 4 notebook (01 -> 02 -> 03 -> 04) như cấu trúc phác thảo ban đầu mà chỉ cần chạy các script trong `src/` hoặc mở 2 notebook phân tích chính hiện có.
 
 ---
 *Xây dựng với niềm đam mê quản trị ra quyết định dựa trên dữ liệu.* 🚀
